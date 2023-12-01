@@ -1,3 +1,4 @@
+const shuffleArray = require("../helpers/shuffleArray");
 const Test = require("../models/Test");
 
 // Service to get all tests
@@ -14,9 +15,18 @@ exports.getAllTests = async () => {
 exports.getTestById = async (testId) => {
   try {
     const test = await Test.findById(testId).populate("questions");
-    if (!test) {
-      throw new Error("Test not found");
+
+    if (!test || Object.keys(test).length === 0) {
+      throw new ErrorHandler(404, "Test not found!");
     }
+
+    // Shuffle options for each question
+    test.questions.forEach((question) => {
+      question.options = shuffleArray(question.options);
+    });
+
+    // Shuffle questions
+    test.questions = shuffleArray(test.questions);
 
     return test;
   } catch (error) {

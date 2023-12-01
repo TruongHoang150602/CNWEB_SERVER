@@ -1,27 +1,30 @@
 const userResultService = require("../services/userResultService");
 
-exports.saveUserResult = async (req, res) => {
-  const { userId, testId, answers, score } = req.body;
+exports.createNewUserResult = async (req, res, next) => {
+  const { userId, testId, type } = req.params;
 
   try {
-    const savedUserResult = await userResultService.saveUserResult(
+    const newUserResult = await userResultService.createNewUserResult(
       userId,
       testId,
-      answers,
-      score
+      type
     );
-    res.json(savedUserResult);
+    res.json(newUserResult);
+    next();
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
   }
 };
 
 exports.getUserResult = async (req, res) => {
-  const { userId, testId } = req.params;
-
+  const { userId, testId, type } = req.params;
+  console.log(userId, testId, type);
   try {
-    const userResult = await userResultService.getUserResult(userId, testId);
+    const userResult = await userResultService.getUserResult(
+      userId,
+      testId,
+      type
+    );
     res.json(userResult);
   } catch (error) {
     console.error(error);

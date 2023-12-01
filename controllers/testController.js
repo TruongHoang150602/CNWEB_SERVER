@@ -8,9 +8,7 @@ exports.getAllTests = async (req, res, next) => {
   try {
     const tests = await Test.find();
     if (!tests) throw new ErrorHandler(404, "No Tests are found!");
-    res.send({
-      tests,
-    });
+    res.send(tests);
 
     next();
   } catch (error) {
@@ -42,9 +40,7 @@ exports.getTestById = async (req, res, next) => {
     // Shuffle questions
     test.questions = shuffleArray(test.questions);
 
-    res.send({
-      test,
-    });
+    res.send(test);
 
     next();
   } catch (error) {
