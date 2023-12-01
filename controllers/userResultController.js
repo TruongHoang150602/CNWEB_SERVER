@@ -16,6 +16,24 @@ exports.createNewUserResult = async (req, res, next) => {
   }
 };
 
+exports.updateUserResult = async (req, res, next) => {
+  const { userResultId } = req.params;
+  const { answers, isSubmitted, score } = req.body;
+
+  try {
+    const newUserResult = await userResultService.updateUserResult(
+      userResultId,
+      answers,
+      isSubmitted,
+      score
+    );
+    res.json(newUserResult);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getUserResult = async (req, res) => {
   const { userId, testId, type } = req.params;
   console.log(userId, testId, type);

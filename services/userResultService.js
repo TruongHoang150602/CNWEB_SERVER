@@ -5,20 +5,30 @@ const { ErrorHandler } = require("../helpers/error");
 const UserResult = require("../models/UserResult");
 const { getTestById } = require("./testService");
 
-// Service to save user result
-exports.saveUserResult = async (userId, testId, answers, score) => {
+exports.updateUserResult = async (
+  userAnswerId,
+  answers,
+  isSubmitted,
+  score
+) => {
   try {
-    const userResult = new UserResult({
-      userId,
-      testId,
-      answers,
-      score,
-    });
+    // Find the existing user result
+    const existingUserResult = await UserResult.findById(userAnswerId);
 
-    await userResult.save();
-    return userResult;
+    if (!existingUserResult) {
+      throw new ErrorHandler(404, "User result not found");
+    }
+
+    existingUserResult.answers = answers;
+    existingUserResult.isSubmitted = isSubmitted;
+    existingUserResult.score = score;
+
+    // Save the updated user result
+    await existingUserResult.save();
+
+    return existingUserResult;
   } catch (error) {
-    throw new ErrorHandler(404, "Error saving user result");
+    throw new ErrorHandler(500, "Error saving user result", error);
   }
 };
 
@@ -32,7 +42,7 @@ exports.getUserResult = async (userId, testId, type) => {
     })
       .sort({ createdAt: -1 })
       .limit(1)
-      .populate("answers.questionId")
+      .populate("answers.question")
       .populate("answers.options.option");
     return userResult;
   } catch (error) {
@@ -56,7 +66,7 @@ exports.createNewUserResult = async (userId, testId, type) => {
     await userResult.save();
 
     const populatedUserResult = await UserResult.findById(userResult._id)
-      .populate("answers.questionId")
+      .populate("answers.question")
       .populate("answers.options.option");
 
     return populatedUserResult;

@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userAnswerSchema = new Schema({
-  questionId: { type: Schema.Types.ObjectId, ref: "Question" },
+  question: { type: Schema.Types.ObjectId, ref: "Question" },
   options: [
     {
       option: { type: Schema.Types.ObjectId, ref: "Option" },
       isSelected: { type: Boolean },
     },
   ],
-  answers: { type: String },
+  answer: { type: String },
   showAnswer: {
     type: Boolean,
   },

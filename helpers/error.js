@@ -16,7 +16,7 @@ const handleError = (err, res) => {
     message = err.message;
   } else if (err.name === "CastError" && err.kind === "ObjectId") {
     // Xử lý lỗi CastError khi không tìm thấy đối tượng
-    statusCode = 404;
+    statusCode = 500;
     message = "Not Found";
   } // Thêm các điều kiện xử lý lỗi khác ở đây (nếu cần)
 
