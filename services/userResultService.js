@@ -1,5 +1,6 @@
 const {
   converTestToUserAnswerSchema,
+  convertUserResultToOutputStandard,
 } = require("../convert/UserResultConvert");
 const { ErrorHandler } = require("../helpers/error");
 const UserResult = require("../models/UserResult");
@@ -44,7 +45,8 @@ exports.getUserResult = async (userId, testId, type) => {
       .limit(1)
       .populate("answers.question")
       .populate("answers.options.option");
-    return userResult;
+    console.log(userResult.answers[0].options);
+    return convertUserResultToOutputStandard(userResult);
   } catch (error) {
     throw new ErrorHandler(404, "Error getting user result");
   }
@@ -69,7 +71,7 @@ exports.createNewUserResult = async (userId, testId, type) => {
       .populate("answers.question")
       .populate("answers.options.option");
 
-    return populatedUserResult;
+    return convertUserResultToOutputStandard(populatedUserResult);
   } catch (error) {
     throw new ErrorHandler(404, "Error getting user result");
   }
