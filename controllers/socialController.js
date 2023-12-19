@@ -57,8 +57,23 @@ const getRecentSocials = async (req, res) => {
         return res.status(500).json("Server Error");
     }
 }
+
+const getSocialById = async (req, res) => {
+    try {
+        const result = await serviceSocial.getSocialById(req.query.id);
+        if (result.state) {
+            return res.status(200).json(result.dataRes);
+        }
+        return res.status(500).json("Server Error");
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json("Server Error");
+    }
+}
+
 module.exports = {
     addSocial: addSocial,
     addComment: addComment,
     getRecentSocials: getRecentSocials,
+    getSocialById: getSocialById,
 };
