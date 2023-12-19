@@ -9,7 +9,7 @@ const addSocial = async (req, res) => {
             return res.status(400).json("Vui lòng cung cấp đầy đủ thông tin: title và attachment.");
         }
 
-        const result = await serviceSocial.addSocial(input.title, input.attachment);
+        const result = await serviceSocial.addSocial(input.title, input.attachment, input.author_id);
         if (result.state) {
             return res.status(200).json("Add Social Success!");
         } else {
@@ -43,7 +43,22 @@ const addComment = async (req, res) => {
     }
 }
 
+const getRecentSocials = async (req, res) => {
+    try {
+        const limit = 10;
+        const skip = (req.query.page - 1) * limit;
+        const result = await serviceSocial.getRecentSocials(skip, limit);
+        if (!result.state) {
+            return res.status(500).json("Server Error!");
+        }
+        return res.status(200).json(result.dataRes);
+    } catch (e) {
+        console.log(e);
+        return res.status(500).json("Server Error");
+    }
+}
 module.exports = {
     addSocial: addSocial,
     addComment: addComment,
+    getRecentSocials: getRecentSocials,
 };
