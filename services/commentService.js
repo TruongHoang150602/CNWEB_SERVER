@@ -1,4 +1,5 @@
 const Comment = require("../models/Comment");
+const User = require("../models/User");
 
 exports.addComment = async (social_id, user_id, content, attachment, parent_comment_id) => {
     try {
@@ -13,5 +14,26 @@ exports.addComment = async (social_id, user_id, content, attachment, parent_comm
         return { state: true, newComment };
     } catch (e) {
         return { state: false, message: e }
+    }
+}
+
+exports.getCommentsById = async (id) => {
+    try {
+        const comment = await Comment.findById(id);
+        const author = await User.findById(comment.user_id);
+        const resData = {
+            id: comment._id,
+            author: {
+                id: author._id,
+                avatar: author.avatar,
+                name: author.name,
+            },
+            createdAt: comment.created_at,
+            content: comment.content,
+            parent: comment.parent_comment_id,
+        };
+        return { state: true, resData };
+    } catch (e) {
+        return { state: false };
     }
 }
