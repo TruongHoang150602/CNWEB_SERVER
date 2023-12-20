@@ -1,51 +1,56 @@
-const User = require("../models/User"); // Import model "User"
+const userService = require("../services/userService");
 
-// Controller để lấy tất cả người dùng
-const getAllUsers = async (req, res) => {
+exports.getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().sort({ highScore: -1 }).exec();
-    return res.status(200).json(users);
+    const { query } = req.body;
+    console.log("Query: ", query);
+    const users = await userService.getUsers(query || "");
+    res.json(users);
+    next();
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-// Controller để thêm một người dùng mới
-const addUser = async (req, res) => {
-  const { id, name, highScore } = req.body;
-  console.log(req.body);
-
+exports.getUserById = async (req, res, next) => {
   try {
-    const newUser = new User({
-      id,
-      name,
-      highScore,
-    });
-    console.log(newUser);
-    const savedUser = await newUser.save();
-    return res.status(201).json(savedUser);
+    const { id } = req.params;
+    const user = await userService.getUserById(id);
+    res.json(user);
+    next();
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-const deleteUser = async (req, res) => {
-  const userId = req.params.userId;
-
+exports.getFullUserInfoById = async (req, res, next) => {
   try {
-    const deletedUser = await User.findByIdAndRemove(userId);
-
-    if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    return res.json({ message: "User deleted successfully" });
+    const { id } = req.params;
+    const user = await userService.getFullUserInfoById(id);
+    res.json(user);
+    next();
   } catch (error) {
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-module.exports = {
-  getAllUsers,
-  addUser,
-  deleteUser,
+exports.createNewUser = async (req, res, next) => {
+  try {
+    const { name, id } = req.body;
+    const newUser = await userService.createNewUser(name, id);
+    res.json(newUser);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+exports.updateUserInfo = async (req, res, next) => {
+  try {
+    const updatedUser = req.body;
+    const updatedUserInfo = await userService.updateUserInfo(updatedUser);
+    res.json(updatedUserInfo);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
