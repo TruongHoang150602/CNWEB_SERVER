@@ -1,73 +1,96 @@
 const Social = require("../models/Social");
-const serviceSocial = require("../services/socialService");
-const serviceComment = require("../services/commentService");
+const SocialService = require("../services/socialService");
+const CommentService = require("../services/commentService");
+const UserService = require("../services/userService");
+const { ErrorHandler } = require("../helpers/error");
 
-const addSocial = async (req, res) => {
+const addSocial = async (req, res, next) => {
     try {
         const input = req.body;
-        if (!input.title || !input.attachment) {
-            return res.status(400).json("Vui lòng cung cấp đầy đủ thông tin: title và attachment.");
+        if (!input.author_id || !input.title) {
+            throw new ErrorHandler(400, "Cannot be left blank: author_id or title");
         }
-
-        const result = await serviceSocial.addSocial(input.title, input.attachment, input.author_id);
-        if (result.state) {
-            return res.status(200).json("Add Social Success!");
-        } else {
-            return res.status(500).json("Add Social Fail!");
-        }
+        const result = await SocialService.addSocial(input.title, input.attachment, input.author_id);
+        return res.status(200).json("Add Social Success!");
     } catch (error) {
-        return res.status(500).json("Lỗi server");
+        next(error);
     }
 };
 
-const addComment = async (req, res) => {
+const addComment = async (req, res, next) => {
     try {
         const input = req.body;
         const social = await Social.findById(input.social_id);
         if (!social) {
-            return res.status(400).json("Social khong ton tai!");
+            throw new ErrorHandler(400, "Social does not exist");
         }
-        const result = await serviceComment.addComment(
+        const result = await CommentService.addComment(
             input.social_id,
             input.user_id,
             input.content,
             input.attachment,
             input.parent_comment_id,
         );
-        social.comments.push(result.newComment._id);
+        social.comments.push(result._id);
         await social.save();
         return res.status(200).json("Add Comment Success!");
     } catch (e) {
-        console.log(e);
-        return res.status(500).json("Lỗi server");
+        next(e);
     }
 }
 
-const getRecentSocials = async (req, res) => {
+const getRecentSocials = async (req, res, next) => {
     try {
         const limit = 10;
         const skip = (req.query.page - 1) * limit;
-        const result = await serviceSocial.getRecentSocials(skip, limit);
-        if (!result.state) {
-            return res.status(500).json("Server Error!");
-        }
-        return res.status(200).json(result.dataRes);
+        const result = await SocialService.getRecentSocials(skip, limit);
+        return res.status(200).json(result);
     } catch (e) {
-        console.log(e);
-        return res.status(500).json("Server Error");
+        next(e);
     }
 }
 
-const getSocialById = async (req, res) => {
+const getSocialById = async (req, res, next) => {
     try {
-        const result = await serviceSocial.getSocialById(req.query.id);
-        if (result.state) {
-            return res.status(200).json(result.dataRes);
-        }
-        return res.status(500).json("Server Error");
+        const result = await SocialService.getSocialById(req.query.id);
+        return res.status(200).json(result);
     } catch (e) {
-        console.log(e);
-        return res.status(500).json("Server Error");
+        next(e);
+    }
+}
+
+const addLike = async (req, res, next) => {
+    try {
+        const author_id = req.body.author_id;
+        const social_id = req.body.social_id;
+        const social = await Social.findById(social_id);
+        if (!social) {
+            throw new ErrorHandler(400, "Social does not exist");
+        }
+        social.like_list.push(author_id);
+        social.save();
+        return res.status(200).json("Liked");
+    } catch (e) {
+        next(e);
+    }
+}
+
+const getLikeList = async (req, res, next) => {
+    try {
+        const social_id = req.query.id;
+        const social = await Social.findById(social_id);
+        if (!social) {
+            throw new ErrorHandler(400, "Social does not exist");
+        }
+        const list_author = social.like_list;
+        var comments = [];
+        await Promise.all(list_author.map(async (author_id) => {
+            const author = await UserService.getUserById(author_id);
+            comments.push(author.name);
+        }))
+        return res.status(200).json(comments);
+    } catch (error) {
+        next(error);
     }
 }
 
@@ -76,4 +99,6 @@ module.exports = {
     addComment: addComment,
     getRecentSocials: getRecentSocials,
     getSocialById: getSocialById,
+    addLike: addLike,
+    getLikeList: getLikeList,
 };

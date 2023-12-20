@@ -1,14 +1,17 @@
+const { handleError, ErrorHandler } = require("../helpers/error");
 const Social = require("../models/Social")
 const User = require("../models/User")
 const CommentService = require("../services/commentService");
+const UserService = require("../services/userService");
+const CommentConvert = require("../convert/comment");
 
 exports.addSocial = async (title, attachment, author_id) => {
     try {
         const newSocial = new Social({ title: title, attachments: attachment, like: 0, created_by: author_id });
         await newSocial.save();
-        return { state: true };
+        return true;
     } catch (e) {
-        return { state: false, message: e };
+        throw new ErrorHandler(400, "Please enter complete information");
     }
 }
 
@@ -18,76 +21,53 @@ exports.getRecentSocials = async (skip, limit) => {
         const recentSocial = await Social.find()
             .sort({ created_at: -1 })
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .populate("comments")
 
         await Promise.all(recentSocial.map(async (social) => {
-            const getAuthor = await User.findById(social.created_by);
-            var cmts = [];
-            if (social.comments) {
-                await Promise.all(social.comments.map(async (comment) => {
-                    const getComment = await CommentService.getCommentsById(comment);
-                    if (getComment.state) {
-                        cmts.push(getComment.resData);
-                    }
-                }))
-            }
+            const getAuthor = await UserService.getUserById(social.created_by);
+            const comments = await CommentConvert.convertArrayComment(social.comments);
             const result = {
                 id: social._id,
-                author: {
-                    id: getAuthor._id,
-                    avatar: getAuthor.avatar,
-                    name: getAuthor.name,
-                },
-                comments: cmts,
+                author: getAuthor,
+                comments: comments,
                 createdAt: social.created_at,
-                likedList: [],
+                likedList: social.like_list,
                 likes: social.like,
                 attachments: social.attachments,
                 content: social.title,
             }
             dataRes.push(result);
         }))
-        return { state: true, dataRes };
+        return dataRes;
     } catch (e) {
-        console.log(e);
-        return { state: false };
+        throw new ErrorHandler(500, "Server Error");
     }
 }
 
 exports.getSocialById = async (id) => {
     try {
         const dataRes = [];
-        const results = await Social.find({ created_by: id }).sort({ created_at: -1 });
+        const results = await Social.find({ created_by: id })
+            .sort({ created_at: -1 })
+            .populate("comments");
         await Promise.all(results.map(async (social) => {
-            const getAuthor = await User.findById(social.created_by);
-            var cmts = [];
-            if (social.comments) {
-                await Promise.all(social.comments.map(async (comment) => {
-                    const getComment = await CommentService.getCommentsById(comment);
-                    if (getComment.state) {
-                        cmts.push(getComment.resData);
-                    }
-                }))
-            }
+            const getAuthor = await UserService.getUserById(social.created_by);
+            const comments = await CommentConvert.convertArrayComment(social.comments);
             const result = {
                 id: social._id,
-                author: {
-                    id: getAuthor._id,
-                    avatar: getAuthor.avatar,
-                    name: getAuthor.name,
-                },
-                comments: cmts,
+                author: getAuthor,
+                comments: comments,
                 createdAt: social.created_at,
-                likedList: [],
+                likedList: social.like_list,
                 likes: social.like,
                 attachments: social.attachments,
                 content: social.title,
             }
             dataRes.push(result);
         }))
-        return { state: true, dataRes };
+        return dataRes;
     } catch (e) {
-        console.log(e);
-        return { state: false };
+        throw new ErrorHandler(500, "Server Error");
     }
 }
