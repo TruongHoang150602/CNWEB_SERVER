@@ -6,7 +6,7 @@ const router = express.Router();
 
 // {
 //     "author_id":"ilVcEIE9UvOYqMxWjXk2NKdFmi63",
-//     "title": "Social",
+//     "content": "Social",
 //     "attachment": "http://google.com"
 // }
 router.post("", socialController.addSocial);
@@ -26,6 +26,6 @@ router.get("/user", socialController.getSocialById); // ?id=1
 //     "social_id": "6582b8d301771f172f03f1e5"
 // }
 router.put("", socialController.addLike);
-router.get("/like", socialController.getLikeList); // ?id=1
+// router.get("/like", socialController.getLikeList); // ?id=1
 
 module.exports = router;
