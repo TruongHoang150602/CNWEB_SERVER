@@ -6,7 +6,7 @@ exports.convertOneComment = async (comment) => {
         id: comment._id,
         author: author,
         createdAt: comment.created_at,
-        attachment: comment.attachments,
+        attachment: comment.attachment,
         content: comment.content,
         parent: comment.parent_comment_id
     }

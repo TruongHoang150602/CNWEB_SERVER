@@ -8,7 +8,7 @@ exports.addComment = async (social_id, user_id, content, attachment, parent_comm
             social_id,
             user_id,
             content,
-            attachments: attachment,
+            attachment,
             parent_comment_id,
         });
         await newComment.save();

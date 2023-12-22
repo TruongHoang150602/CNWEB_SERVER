@@ -7,10 +7,10 @@ const { ErrorHandler } = require("../helpers/error");
 const addSocial = async (req, res, next) => {
     try {
         const input = req.body;
-        if (!input.author_id || !input.title) {
-            throw new ErrorHandler(400, "Cannot be left blank: author_id or title");
+        if (!input.author_id || !input.content) {
+            throw new ErrorHandler(400, "Cannot be left blank: author_id or content");
         }
-        const result = await SocialService.addSocial(input.title, input.attachment, input.author_id);
+        const result = await SocialService.addSocial(input.content, input.attachment, input.author_id);
         return res.status(200).json("Add Social Success!");
     } catch (error) {
         next(error);

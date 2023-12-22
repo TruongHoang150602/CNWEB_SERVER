@@ -5,9 +5,9 @@ const CommentService = require("../services/commentService");
 const UserService = require("../services/userService");
 const CommentConvert = require("../convert/comment");
 
-exports.addSocial = async (title, attachment, author_id) => {
+exports.addSocial = async (content, attachment, author_id) => {
     try {
-        const newSocial = new Social({ title: title, attachments: attachment, like: 0, created_by: author_id });
+        const newSocial = new Social({ content: content, attachment: attachment, like: 0, created_by: author_id });
         await newSocial.save();
         return true;
     } catch (e) {
@@ -34,8 +34,8 @@ exports.getRecentSocials = async (skip, limit) => {
                 createdAt: social.created_at,
                 likedList: social.like_list,
                 likes: social.like,
-                attachments: social.attachments,
-                content: social.title,
+                attachment: social.attachment,
+                content: social.content,
             }
             dataRes.push(result);
         }))
@@ -61,8 +61,8 @@ exports.getSocialById = async (id) => {
                 createdAt: social.created_at,
                 likedList: social.like_list,
                 likes: social.like,
-                attachments: social.attachments,
-                content: social.title,
+                attachment: social.attachment,
+                content: social.content,
             }
             dataRes.push(result);
         }))
