@@ -45,7 +45,6 @@ exports.getUserResult = async (userId, testId, type) => {
       .limit(1)
       .populate("answers.question")
       .populate("answers.options.option");
-    console.log(userResult.answers[0].options);
     return convertUserResultToOutputStandard(userResult);
   } catch (error) {
     throw new ErrorHandler(404, "Error getting user result");
